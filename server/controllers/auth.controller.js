@@ -1,11 +1,11 @@
 import { database } from "../database/config.js";
 import bcryptjs from 'bcryptjs';
-// import {generateVerificationCode} from '../utils/generateVerificationCode.js'
+import {generateVerificationCode} from '../utils/generateVerificationCode.js'
 import { generateTokenAndSetCookies } from "../utils/generateTokenAndSetCookies.js";
 import sendVerificationMail from "../mail/sendVerificationMail.js";
 
 
-
+//! LOG-IN ROUTE-------------------------|
 export const login = async (req, res) => {
   const {email, password} = req.body;
   if(!email || !password){
@@ -43,8 +43,7 @@ export const login = async (req, res) => {
 };
 
 
-
-
+//! SIGN-UP ROUTE-------------------------|
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -53,25 +52,22 @@ export const signup = async (req, res) => {
     }
     const db = await database();
     const userAlreadyExist = await db.collection('users').findOne({email});
-    console.log("userAlreadyExist" ,userAlreadyExist);
     
     if(userAlreadyExist){
         return res.status(400).json({success : false, message : "user already exist!"})
     }
     const hassedPassword = await bcryptjs.hash(password, 10);
-    const verificationToken = Math.floor(1000000 + Math.random() * 90000).toString();
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
     const userData = {
         name,
         email,
         password : hassedPassword,
         lastLoginAt : Date.now(),
-        isVerified : false,
-        verificationToken,
         lastupdatedAt : Date.now(),
         createdAt : Date.now(),
+        isVerified : false,
+        verificationToken,
         verificationTokenExpireAt : Date.now() + 24 * 60 * 60 * 1000, // 24 HOURS
-        resetPasswordToken : undefined,
-        resetPasswordTokenExpiresAt : undefined,
         resetPasswordToken : undefined,
         resetPasswordTokenExpiresAt : undefined,
     }
@@ -97,9 +93,7 @@ export const signup = async (req, res) => {
 };
 
 
-
-
-
+//! VERIFY-EMAIL ROUTE-------------------------|
 export const verifyEmail = async (req, res) => {
   const {verificationToken} = req.body;
   if(!verificationToken){
@@ -130,11 +124,12 @@ export const verifyEmail = async (req, res) => {
 };
 
 
-
-
-
-
+//! LOG-OUT ROUTE-------------------------|
 export const logout = (req, res) => {
   res.clearCookie('token');
   res.status(200).json({success : true, message : "logout successfully"});
 };
+
+export const isAuth = (req, res) => {
+  
+}
